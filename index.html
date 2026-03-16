@@ -4,6 +4,9 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Student Information System</title>
     <style>
         :root {
@@ -59,7 +62,7 @@
         }
 
         .header {
-            text-align: center;
+            text-align: left;
             margin-bottom: 40px;
         }
 
@@ -140,7 +143,7 @@
 
         .loading {
             display: none;
-            text-align: center;
+            text-align: left;
             margin: 20px 0;
         }
 
@@ -151,7 +154,7 @@
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 0 10px;
         }
 
         @keyframes spin {
@@ -346,10 +349,13 @@
         // Load CSV data from external file or embedded data
         async function loadCSV() {
             try {
-                // Add timestamp to prevent caching
-                const cacheBuster = `?t=${new Date().getTime()}`;
-                // Try to fetch the CSV file (for local development with server)
-                const response = await fetch('data.csv' + cacheBuster);
+                // Try to fetch the CSV file without using browser cache
+                const response = await fetch('data.csv', {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 if (response.ok) {
                     const csvText = await response.text();
                     csvData = parseCSV(csvText);
@@ -361,8 +367,12 @@
                 console.log('Loading from GitHub CSV...');
                 // Fall back to GitHub raw content
                 try {
-                    const cacheBuster = `?t=${new Date().getTime()}`;
-                    const response = await fetch('https://raw.githubusercontent.com/kerrotech/scheduleprinting/main/data.csv' + cacheBuster);
+                    const response = await fetch('https://raw.githubusercontent.com/kerrotech/scheduleprinting/main/data.csv', {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
                     const csvText = await response.text();
                     csvData = parseCSV(csvText);
                     initializeHeaderIndex();
@@ -572,8 +582,8 @@
 
             const margin = 18;
             const pageHeight = 792;
-            const centerX = 226.8 / 2;
             const lineHeight = 18;
+            const textX = margin;
 
             let y = margin;
 
@@ -584,11 +594,11 @@
 
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text(String(studentData.lastName || ''), centerX, y, { align: 'center' });
+            doc.text(String(studentData.lastName || ''), textX, y);
             y += lineHeight;
-            doc.text(String(studentData.firstName || ''), centerX, y, { align: 'center' });
+            doc.text(String(studentData.firstName || ''), textX, y);
             y += lineHeight;
-            doc.text(String(studentData.id || ''), centerX, y, { align: 'center' });
+            doc.text(String(studentData.id || ''), textX, y);
 
             return doc;
         }
