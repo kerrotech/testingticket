@@ -344,7 +344,6 @@
         let studentData = null;
         let csvData = [];
         let headerIndex = {};
-        let autoPrintType = null;
 
         // Load CSV data from external file or embedded data
         async function loadCSV() {
@@ -479,6 +478,18 @@
             hideLoading();
         }
 
+        function resetPage() {
+            studentData = null;
+            document.getElementById('studentId').value = '';
+            document.getElementById('displayId').textContent = '';
+            document.getElementById('displayLastName').textContent = '';
+            document.getElementById('displayFirstName').textContent = '';
+            document.getElementById('studentInfo').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            hideLoading();
+            document.getElementById('studentId').focus();
+        }
+
         function search() {
             const id = document.getElementById('studentId').value.trim();
             
@@ -539,31 +550,19 @@
             document.getElementById('displayFirstName').textContent = data.firstName;
 
             document.getElementById('studentInfo').style.display = 'block';
-            
-            if (autoPrintType) {
-                const typeToProcess = autoPrintType;
-                autoPrintType = null;
-                
-                setTimeout(() => {
-                    if (typeToProcess === 'device') {
-                        printPDF();
-                    }
-                }, 500);
-            }
+
+            setTimeout(() => {
+                printPDF();
+            }, 150);
         }
 
         function prefillFromQuery() {
             const params = new URLSearchParams(window.location.search);
             const studentId = params.get('studentId') || params.get('id');
-            const type = params.get('type');
             
             if (studentId) {
                 document.getElementById('studentId').value = studentId.trim();
-                
-                if (type) {
-                    autoPrintType = type;
-                }
-                
+
                 if (/^\d{5}$/.test(studentId.trim())) {
                     setTimeout(() => {
                         search();
@@ -621,6 +620,17 @@
                             printWindow.print();
                         }, 250);
                     };
+
+                    const monitorWindow = setInterval(() => {
+                        if (printWindow.closed) {
+                            clearInterval(monitorWindow);
+                            URL.revokeObjectURL(url);
+                            resetPage();
+                        }
+                    }, 300);
+                } else {
+                    URL.revokeObjectURL(url);
+                    alert('Popup blocked. Please allow popups for this site.');
                 }
             } catch (error) {
                 console.error('PDF generation failed:', error);
