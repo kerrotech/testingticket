@@ -226,90 +226,10 @@
             color: var(--text-color);
         }
 
-        .schedule-section {
-            margin-top: 30px;
-        }
-
-        .schedule-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #1e2328;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-        }
-
-        .schedule-table th {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
-            padding: 16px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        .schedule-table td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-        }
-
-        .schedule-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .schedule-table tr:nth-child(even) {
-            background-color: #2c3540;
-        }
-
-        .period-cell {
-            font-weight: 600;
-            color: var(--accent-color);
-            font-size: 0.95rem;
-            width: 80px;
-            text-align: center;
-            background: var(--secondary-color);
-        }
-
-        .class-cell {
-            font-size: 1rem;
-            color: var(--text-color);
-            font-weight: 500;
-        }
-
         .button-group {
             display: flex;
             gap: 10px;
             align-items: center;
-        }
-
-        .ch-btn {
-            background: linear-gradient(135deg, var(--success-color), #059669);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .ch-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
         }
 
         .pdf-btn {
@@ -360,19 +280,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .schedule-table {
-                font-size: 0.85rem;
-            }
-
-            .schedule-table th,
-            .schedule-table td {
-                padding: 12px 8px;
-            }
-
-            .period-cell {
-                width: 60px;
-            }
-
             .student-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -407,11 +314,8 @@
 
         <div class="student-info" id="studentInfo">
             <div class="student-header">
-                <div class="student-name" id="studentName"></div>
                 <div class="button-group">
-                    <button class="pdf-btn" onclick="printChargerPDF('lost')">💰 Charger Lost</button>
-                    <button class="pdf-btn" onclick="printChargerPDF('damaged')">🔌 Charger Damaged</button>
-                    <button class="pdf-btn" onclick="printPDF()">📄 Print Schedule</button>
+                    <button class="pdf-btn" onclick="printPDF()">📄 Print Ticket</button>
                 </div>
             </div>
 
@@ -421,24 +325,13 @@
                     <div class="detail-value" id="displayId"></div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Grade Level</div>
-                    <div class="detail-value" id="displayGrade"></div>
+                    <div class="detail-label">Last Name</div>
+                    <div class="detail-value" id="displayLastName"></div>
                 </div>
-            </div>
-
-            <div class="schedule-section">
-                <div class="schedule-title">📚 Class Schedule</div>
-                <table class="schedule-table" id="scheduleTable">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>A Block</th>
-                            <th>Period</th>
-                            <th>B Block</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scheduleTableBody"></tbody>
-                </table>
+                <div class="detail-item">
+                    <div class="detail-label">First Name</div>
+                    <div class="detail-value" id="displayFirstName"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -449,10 +342,6 @@
         let csvData = [];
         let headerIndex = {};
         let autoPrintType = null;
-        let ticketNumber = null;
-
-        // CSV data embedded directly in the HTML
-        const csvContent = `Student ID,Last,First,Grade,EMAIL,,A1,A2,A3,A4,B1,B2,B3,B4`;
 
         // Load CSV data from external file or embedded data
         async function loadCSV() {
@@ -607,15 +496,6 @@
             const studentIdIndex = getColumnIndex('Student ID', 'StudentId', 'StateStudentID');
             const lastNameIndex = getColumnIndex('Last', 'LastName', 'CNSLAST');
             const firstNameIndex = getColumnIndex('First', 'FirstName', 'CNSFIRST');
-            const gradeIndex = getColumnIndex('Grade');
-            const a1Index = getColumnIndex('A1');
-            const a2Index = getColumnIndex('A2');
-            const a3Index = getColumnIndex('A3');
-            const a4Index = getColumnIndex('A4');
-            const b1Index = getColumnIndex('B1');
-            const b2Index = getColumnIndex('B2');
-            const b3Index = getColumnIndex('B3');
-            const b4Index = getColumnIndex('B4');
             
             for (let i = 1; i < csvData.length; i++) {
                 const csvId = String(getCellValue(csvData[i], studentIdIndex, 0)).trim();
@@ -626,18 +506,8 @@
                     
                     return {
                         id: getCellValue(csvData[i], studentIdIndex, 0),
-                        fullName: firstName + " " + lastName,
                         firstName: firstName,
-                        lastName: lastName,
-                        grade: getCellValue(csvData[i], gradeIndex, 3),
-                        A1: getCellValue(csvData[i], a1Index),
-                        A2: getCellValue(csvData[i], a2Index),
-                        A3: getCellValue(csvData[i], a3Index),
-                        A4: getCellValue(csvData[i], a4Index),
-                        B1: getCellValue(csvData[i], b1Index),
-                        B2: getCellValue(csvData[i], b2Index),
-                        B3: getCellValue(csvData[i], b3Index),
-                        B4: getCellValue(csvData[i], b4Index)
+                        lastName: lastName
                     };
                 }
             }
@@ -653,38 +523,10 @@
             }
 
             studentData = data;
-            
-            document.getElementById('studentName').textContent = `${data.firstName} ${data.lastName}`;
+
             document.getElementById('displayId').textContent = data.id;
-            document.getElementById('displayGrade').textContent = `Grade ${data.grade}`;
-
-            const scheduleTableBody = document.getElementById('scheduleTableBody');
-            scheduleTableBody.innerHTML = '';
-
-            const aPeriods = [
-                { period: 'A1', value: data.A1 || 'No Class' },
-                { period: 'A2', value: data.A2 || 'No Class' },
-                { period: 'A3', value: data.A3 || 'No Class' },
-                { period: 'A4', value: data.A4 || 'No Class' }
-            ];
-
-            const bPeriods = [
-                { period: 'B1', value: data.B1 || 'No Class' },
-                { period: 'B2', value: data.B2 || 'No Class' },
-                { period: 'B3', value: data.B3 || 'No Class' },
-                { period: 'B4', value: data.B4 || 'No Class' }
-            ];
-
-            for (let i = 0; i < 4; i++) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="period-cell">${aPeriods[i].period}</td>
-                    <td class="class-cell">${aPeriods[i].value}</td>
-                    <td class="period-cell">${bPeriods[i].period}</td>
-                    <td class="class-cell">${bPeriods[i].value}</td>
-                `;
-                scheduleTableBody.appendChild(row);
-            }
+            document.getElementById('displayLastName').textContent = data.lastName;
+            document.getElementById('displayFirstName').textContent = data.firstName;
 
             document.getElementById('studentInfo').style.display = 'block';
             
@@ -695,10 +537,6 @@
                 setTimeout(() => {
                     if (typeToProcess === 'device') {
                         printPDF();
-                    } else if (typeToProcess === 'charger-lost') {
-                        printChargerPDF('lost');
-                    } else if (typeToProcess === 'charger-damaged') {
-                        printChargerPDF('damaged');
                     }
                 }, 500);
             }
@@ -708,17 +546,12 @@
             const params = new URLSearchParams(window.location.search);
             const studentId = params.get('studentId') || params.get('id');
             const type = params.get('type');
-            const ticket = params.get('ticketNumber');
             
             if (studentId) {
                 document.getElementById('studentId').value = studentId.trim();
                 
                 if (type) {
                     autoPrintType = type;
-                }
-                
-                if (ticket) {
-                    ticketNumber = ticket.trim();
                 }
                 
                 if (/^\d{5}$/.test(studentId.trim())) {
@@ -729,7 +562,7 @@
             }
         }
 
-        function generatePDF(chargerType = null) {
+        function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
                 orientation: 'portrait',
@@ -738,110 +571,24 @@
             });
 
             const margin = 18;
-            let y = margin + 10;
+            const pageHeight = 792;
             const centerX = 226.8 / 2;
+            const lineHeight = 18;
 
-            if (chargerType === 'lost') {
-                doc.setFontSize(22);
-                doc.setFont(undefined, 'bold');
-                doc.text('CHARGER: $15', centerX, y, { align: 'center' });
-                y += 20;
-            } else if (chargerType === 'damaged') {
-                doc.setFontSize(22);
-                doc.setFont(undefined, 'bold');
-                doc.text('CHARGER - NO FEE', centerX, y, { align: 'center' });
-                y += 20;
-            }
+            let y = margin;
 
-            const now = new Date();
-            const dateTimeString = now.toLocaleString('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            });
-            
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text(dateTimeString, centerX, y, { align: 'center' });
-            y += 12;
+            y += lineHeight * 10;
 
-            doc.setFontSize(11);
-            doc.text('----------------------------------------', centerX, y, { align: 'center' });
-            y += 15;
+            const bottomStartY = pageHeight - margin - (lineHeight * 2);
+            y = Math.max(y, bottomStartY);
 
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text(studentData.lastName + ', ' + studentData.firstName, centerX, y, { align: 'center' });
-            y += 14;
-
-            doc.setFontSize(15);
-            doc.text(studentData.id, centerX, y, { align: 'center' });
-            y += 12;
-
-            doc.setFontSize(12);
-            doc.text('Grade ' + studentData.grade, centerX, y, { align: 'center' });
-            y += 15;
-
-            doc.text('----------------------------------------', centerX, y, { align: 'center' });
-            y += 15;
-
-            doc.setFontSize(13);
-            doc.setFont(undefined, 'bold');
-            doc.text('SCHEDULE', centerX, y, { align: 'center' });
-            y += 15;
-
-            doc.setFontSize(13);
-            doc.setFont(undefined, 'normal');
-            
-            const leftX = margin;
-            const rightX = centerX + 10;
-            
-            // Side by side schedule
-            const aBlocks = [
-                { period: 'A1', class: studentData.A1 || 'No Class' },
-                { period: 'A2', class: studentData.A2 || 'No Class' },
-                { period: 'A3', class: studentData.A3 || 'No Class' },
-                { period: 'A4', class: studentData.A4 || 'No Class' }
-            ];
-            
-            const bBlocks = [
-                { period: 'B1', class: studentData.B1 || 'No Class' },
-                { period: 'B2', class: studentData.B2 || 'No Class' },
-                { period: 'B3', class: studentData.B3 || 'No Class' },
-                { period: 'B4', class: studentData.B4 || 'No Class' }
-            ];
-
-            // Print A and B side by side
-            for (let i = 0; i < 4; i++) {
-                // Left side (A blocks)
-                doc.setFont(undefined, 'bold');
-                doc.text(`${aBlocks[i].period}:`, leftX, y);
-                doc.setFont(undefined, 'normal');
-                doc.text(aBlocks[i].class, leftX + 22, y);
-                
-                // Right side (B blocks)
-                doc.setFont(undefined, 'bold');
-                doc.text(`${bBlocks[i].period}:`, rightX, y);
-                doc.setFont(undefined, 'normal');
-                doc.text(bBlocks[i].class, rightX + 22, y);
-                
-                y += 14;
-            }
-
-            // Add ticket number at the bottom if provided
-            if (ticketNumber) {
-                y += 10;
-                doc.setFontSize(10);
-                doc.text('----------------------------------------', centerX, y, { align: 'center' });
-                y += 12;
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text('TICKET #' + ticketNumber, centerX, y, { align: 'center' });
-            }
+            doc.text(String(studentData.lastName || ''), centerX, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(String(studentData.firstName || ''), centerX, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(String(studentData.id || ''), centerX, y, { align: 'center' });
 
             return doc;
         }
@@ -853,32 +600,7 @@
             }
 
             try {
-                const doc = generatePDF(null);
-                const pdfBlob = doc.output('blob');
-                const url = URL.createObjectURL(pdfBlob);
-                const printWindow = window.open(url);
-                
-                if (printWindow) {
-                    printWindow.onload = function() {
-                        setTimeout(() => {
-                            printWindow.print();
-                        }, 250);
-                    };
-                }
-            } catch (error) {
-                console.error('PDF generation failed:', error);
-                alert('Failed to generate PDF. Please try again.');
-            }
-        }
-
-        function printChargerPDF(type = 'lost') {
-            if (!studentData) {
-                alert('No student data to print');
-                return;
-            }
-
-            try {
-                const doc = generatePDF(type);
+                const doc = generatePDF();
                 const pdfBlob = doc.output('blob');
                 const url = URL.createObjectURL(pdfBlob);
                 const printWindow = window.open(url);
