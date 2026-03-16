@@ -580,16 +580,10 @@
             });
 
             const margin = 18;
-            const pageHeight = 792;
             const lineHeight = 18;
             const textX = margin;
 
             let y = margin;
-
-            y += lineHeight * 10;
-
-            const bottomStartY = pageHeight - margin - (lineHeight * 2);
-            y = Math.max(y, bottomStartY);
 
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
